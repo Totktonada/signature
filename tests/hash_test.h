@@ -1,0 +1,4 @@
+#ifndef HASH_TEST_H_SENTRY
+#define HASH_TEST_H_SENTRY
+
+#endif // HASH_TEST_H_SENTRY

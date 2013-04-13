@@ -1,24 +1,16 @@
 #include <stdint.h>
-#include "simple_substitution.h"
+#include "substitution.h"
 
 //     Defines
 // ===================================================================
 
 #define S_BLOCKS 8u
 #define S_BLOCK_SIZE 16u
-#define KEYS 8u
 #define SINT_ROUNDS_1 24
 #define SINT_ROUNDS_2 8
 
 //     Static data
 // ===================================================================
-
-// Random 32-bits numbers.
-static const uint_fast32_t keys[KEYS] =
-{
-    0x4FAF51BEu, 0x5C3D20EFu, 0x49BA3FCEu, 0x54C6A33Eu,
-    0x5B7E3D72u, 0xE95B3FC4u, 0xCE42D79Au, 0xBA591FFEu
-};
 
 // Central Bank of Russian Federation S-boxes.
 // Used as example in GOST R 34.11-94.
@@ -100,18 +92,20 @@ static void s_boxes_subst(uint_fast32_t * res, uint_fast32_t x)
     rotate_left(res, 11u);
 }
 
-void simple_substitution(uint_fast64_t * res,
-    const uint_fast64_t * message)
+void substitution(uint_fast64_t * res,
+    u256_t key, uint_fast64_t message)
 {
+    uint_fast32_t k[8u];
     uint_fast32_t tmp;
     uint_fast32_t b, a;
     int i;
 
-    set32_from64(&b, &a, message);
+    split_u256_to_dwords(k, key);
+    set32_from64(&b, &a, &message);
 
     for (i = 0; i < SINT_ROUNDS_1; ++i)
     {
-        sum_mod32(&tmp, a, keys[i % KEYS]);
+        sum_mod32(&tmp, a, k[i % 8u]);
         s_boxes_subst(&tmp, tmp);
         tmp = tmp ^ b;
         b = a;
@@ -120,8 +114,8 @@ void simple_substitution(uint_fast64_t * res,
 
     for (i = SINT_ROUNDS_2 - 1; i >= 0; --i)
     {
-        // We sure that i < KEYS.
-        sum_mod32(&tmp, a, keys[i]);
+        // We sure that i < 8.
+        sum_mod32(&tmp, a, k[i]);
         s_boxes_subst(&tmp, tmp);
         tmp = tmp ^ b;
         b = a;
@@ -131,19 +125,21 @@ void simple_substitution(uint_fast64_t * res,
     set64_from32(res, &a, &b);
 }
 
-void reverse_simple_substitution(uint_fast64_t * res,
-    const uint_fast64_t * encripted)
+void reverse_substitution(uint_fast64_t * res,
+    u256_t key, uint_fast64_t encripted)
 {
+    uint_fast32_t k[8u];
     uint_fast32_t tmp;
     uint_fast32_t b, a;
     int i;
 
-    set32_from64(&b, &a, encripted);
+    split_u256_to_dwords(k, key);
+    set32_from64(&b, &a, &encripted);
 
     for (i = 0; i < SINT_ROUNDS_2; ++i)
     {
-        // We sure that i < KEYS.
-        sum_mod32(&tmp, a, keys[i]);
+        // We sure that i < 8.
+        sum_mod32(&tmp, a, k[i]);
         s_boxes_subst(&tmp, tmp);
         tmp = tmp ^ b;
         b = a;
@@ -152,7 +148,7 @@ void reverse_simple_substitution(uint_fast64_t * res,
 
     for (i = SINT_ROUNDS_1 - 1; i >= 0; --i)
     {
-        sum_mod32(&tmp, a, keys[i % KEYS]);
+        sum_mod32(&tmp, a, k[i % 8u]);
         s_boxes_subst(&tmp, tmp);
         tmp = tmp ^ b;
         b = a;
@@ -161,5 +157,3 @@ void reverse_simple_substitution(uint_fast64_t * res,
 
     set64_from32(res, &a, &b);
 }
-
-

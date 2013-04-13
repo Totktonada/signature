@@ -1,11 +1,21 @@
-SRCMODULES = \
-	simple_substitution.c \
-	tests/simple_substitution_test.c
+SRC = \
+	u256.c \
+	substitution.c \
+	hash.c \
+	ioutils.c
 
-OBJMODULES = $(SRCMODULES:.c=.o)
-HEADERS = $(SRCMODULES:.c=.h)
+OBJ = $(SRC:.c=.o)
+HEADERS = $(SRC:.c=.h)
 
-EXEC_FILE = simple_substitution_test
+TESTS_SRC = \
+	tests/ioutils_test.c \
+	tests/substitution_test.c \
+	tests/hash_test.c
+
+TESTS_OBJ = $(SRC:.c=.o)
+TESTS_HEADERS = $(SRC:.c=.h)
+
+EXEC_FILES = $(TESTS_SRC:.c=)
 
 WARNINGS = -Wall -Wextra
 DEBUG_CFLAGS = -g -DDEBUG=
@@ -16,14 +26,19 @@ DEFINE =
 CFLAGS = --std=c99 -pedantic $(WARNINGS) $(RELEASE_CFLAGS) $(DEFINE)
 #LDFLAGS = -lgmp
 
-default: $(EXEC_FILE)
+default: $(EXEC_FILES)
 
-tests/%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(EXEC_FILE): $(OBJMODULES)
+tests/ioutils_test: $(OBJ) tests/ioutils_test.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
-	strip ${EXEC_FILE}
+	strip $@
+
+tests/substitution_test: $(OBJ) tests/substitution_test.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
+	strip $@
+
+tests/hash_test: $(OBJ) tests/hash_test.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
+	strip $@
 
 ifneq (clean, $(MAKECMDGOALS))
 ifneq (clang_analyze_clean, $(MAKECMDGOALS))
@@ -31,11 +46,11 @@ ifneq (clang_analyze_clean, $(MAKECMDGOALS))
 endif
 endif
 
-deps.mk: $(SRCMODULES) $(HEADERS)
+deps.mk: $(SRC) $(TESTS_SRC) $(HEADERS) $(TESTS_HEADERS)
 	$(CC) -MM $^ > $@
 
 clean:
-	rm -f *.o tests/*.o $(EXEC_FILE) deps.mk *.core core
+	rm -f $(OBJ) $(TESTS_OBJ) $(EXEC_FILES) deps.mk *.core core
 
 clang_analyze_clean:
 	rm -f *.h.gch *.plist

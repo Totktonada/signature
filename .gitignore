@@ -1,7 +1,9 @@
 .*.sw[a-z]
 .vim
 *.o
-simple_substitution_test
+tests/ioutils_test
+tests/substitution_test
+tests/hash_test
 deps.mk
 valgrind.log
 *.h.gch
