@@ -73,11 +73,7 @@ int main(int argc, char ** argv)
 
     get_hash(&hs);
 
-    printf("0x%llX%llX%llX%llX\n",
-        (unsigned long long int) hs.hash[3],
-        (unsigned long long int) hs.hash[2],
-        (unsigned long long int) hs.hash[1],
-        (unsigned long long int) hs.hash[0]);
+    printf_u256(hs.hash);
 
     return EXIT_SUCCESS;
 }

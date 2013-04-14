@@ -45,4 +45,13 @@ int read_qword(reader_state * rs, uint_fast64_t * res);
  * has been readed, otherwise returns count of readed bytes. */
 int read_u256(reader_state * rs, u256_t res);
 
+static inline void printf_u256(const u256_t x)
+{
+    printf("%016llX %016llX %016llX %016llX\n",
+        (unsigned long long int) x[3],
+        (unsigned long long int) x[2],
+        (unsigned long long int) x[1],
+        (unsigned long long int) x[0]);
+}
+
 #endif // IOUTILS_H_SENTRY

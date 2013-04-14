@@ -8,6 +8,9 @@ static void transform_a(u256_t res, const u256_t x)
 {
     if (res == x)
     {
+        // This possible unnecessary copying, but I do not know,
+        // make compiler copy of inline function parameters as
+        // this need here.
         u256_t y;
         concat_u256_from_qwords(y, x[3], x[2], x[1], x[0]);
         concat_u256_from_qwords(res, y[0] ^ y[1], y[3], y[2], y[1]);
@@ -50,7 +53,7 @@ static void gen_keys(u256_t k[4], const u256_t m, const u256_t h)
         0x00FF00FF00FF00FF,
         0xFF00FF00FF00FF00);
 
-    xor_u256(w, h, m);
+    xor_u256(w, m, h);
 
     transform_p(k[0], w);
 
@@ -123,7 +126,7 @@ static void hash_step(u256_t res, const u256_t m, const u256_t h)
     u256_t keys[4];
     u256_t s;
 
-    gen_keys(keys, h, m);
+    gen_keys(keys, m, h);
 
     substitution(s + 0, keys[0], h[0]);
     substitution(s + 1, keys[1], h[1]);
@@ -144,7 +147,7 @@ void init_hasher(hasher_state * hs)
  * indexes of variable message. Unused bytes must be zero.
  * message_length in bytes. */
 void make_hasher_step(hasher_state * hs, const u256_t message,
-    int message_length)
+    unsigned int message_length)
 {
     u256_add_qword(hs->length, hs->length, 8u * message_length);
     u256_add(hs->sum, hs->sum, message);

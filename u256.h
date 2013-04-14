@@ -8,18 +8,18 @@
 typedef uint_fast64_t u256_t[4];
 
 void concat_u256_from_bytes(u256_t res, const unsigned char x[32]);
-// res[31]res[30]...res[0] -- from more to less bytes.
+// res[31]res[30]...res[0] -- from more to less significant bytes.
 void split_u256_to_bytes(unsigned char res[32], const u256_t x);
 
 void concat_u256_from_words(u256_t res, const uint_fast16_t x[16]);
-// res[15]res[14]...res[0] -- from more to less bytes.
+// res[15]res[14]...res[0] -- from more to less significant bytes.
 void split_u256_to_words(uint_fast16_t res[16], const u256_t x);
 
 void concat_u256_from_dwords(u256_t res, const uint_fast32_t x[8]);
-// res[7]res[6]...res[0] -- from more to less bytes.
+// res[7]res[6]...res[0] -- from more to less significant bytes.
 void split_u256_to_dwords(uint_fast32_t res[8], const u256_t x);
 
-inline void concat_u256_from_qwords(u256_t res, uint_fast64_t x3,
+static inline void concat_u256_from_qwords(u256_t res, uint_fast64_t x3,
     uint_fast64_t x2, uint_fast64_t x1, uint_fast64_t x0)
 {
     res[0] = x0;
@@ -28,7 +28,7 @@ inline void concat_u256_from_qwords(u256_t res, uint_fast64_t x3,
     res[3] = x3;
 }
 
-inline void xor_u256(u256_t res, const u256_t x, const u256_t y)
+static inline void xor_u256(u256_t res, const u256_t x, const u256_t y)
 {
     res[0] = x[0] ^ y[0];
     res[1] = x[1] ^ y[1];
@@ -36,7 +36,7 @@ inline void xor_u256(u256_t res, const u256_t x, const u256_t y)
     res[3] = x[3] ^ y[3];
 }
 
-inline void u256_zeroize(u256_t res)
+static inline void u256_zeroize(u256_t res)
 {
     res[0] = 0;
     res[1] = 0;
@@ -45,7 +45,8 @@ inline void u256_zeroize(u256_t res)
 }
 
 // Ignore possible carry in the most significant qword (res[3]).
-inline void u256_add_qword(u256_t res, const u256_t a, uint_fast64_t b)
+static inline void u256_add_qword(u256_t res, const u256_t a,
+    uint_fast64_t b)
 {
     res[0] = a[0] + b;
     res[1] = a[1] + (res[0] < a[0]);
@@ -54,7 +55,7 @@ inline void u256_add_qword(u256_t res, const u256_t a, uint_fast64_t b)
 }
 
 // Ignore possible carry in the most significant qword (res[3]).
-inline void u256_add(u256_t res, const u256_t a, const u256_t b)
+static inline void u256_add(u256_t res, const u256_t a, const u256_t b)
 {
     res[0] = a[0] + b[0];
     res[1] = a[1] + b[1] + (res[0] < a[0]);

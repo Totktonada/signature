@@ -6,16 +6,16 @@ void concat_u256_from_bytes(u256_t res, const unsigned char x[32])
     {
         res[i] = ((uint_fast64_t) x[8 * i]) |
             (((uint_fast64_t) x[8 * i + 1]) << 8u) |
-            (((uint_fast64_t) x[8 + i + 2]) << 16u) |
-            (((uint_fast64_t) x[8 + i + 3]) << 24u) |
-            (((uint_fast64_t) x[8 + i + 4]) << 32u) |
-            (((uint_fast64_t) x[8 + i + 5]) << 40u) |
-            (((uint_fast64_t) x[8 + i + 6]) << 48u) |
-            (((uint_fast64_t) x[8 + i + 7]) << 56u);
+            (((uint_fast64_t) x[8 * i + 2]) << 16u) |
+            (((uint_fast64_t) x[8 * i + 3]) << 24u) |
+            (((uint_fast64_t) x[8 * i + 4]) << 32u) |
+            (((uint_fast64_t) x[8 * i + 5]) << 40u) |
+            (((uint_fast64_t) x[8 * i + 6]) << 48u) |
+            (((uint_fast64_t) x[8 * i + 7]) << 56u);
     }
 }
 
-// res[31]res[30]...res[0] -- from more to less bytes.
+// res[31]res[30]...res[0] -- from more to less significant bytes.
 void split_u256_to_bytes(unsigned char res[32], const u256_t x)
 {
     for (unsigned int i = 0; i < 4; ++i)
@@ -37,12 +37,12 @@ void concat_u256_from_words(u256_t res, const uint_fast16_t x[16])
     {
         res[i] = ((uint_fast64_t) x[4 * i]) |
             (((uint_fast64_t) x[4 * i + 1]) << 16u) |
-            (((uint_fast64_t) x[4 + i + 2]) << 32u) |
-            (((uint_fast64_t) x[4 + i + 3]) << 48u);
+            (((uint_fast64_t) x[4 * i + 2]) << 32u) |
+            (((uint_fast64_t) x[4 * i + 3]) << 48u);
     }
 }
 
-// res[15]res[14]...res[0] -- from more to less bytes.
+// res[15]res[14]...res[0] -- from more to less significant bytes.
 void split_u256_to_words(uint_fast16_t res[16], const u256_t x)
 {
     for (unsigned int i = 0; i < 4; ++i)
@@ -63,7 +63,7 @@ void concat_u256_from_dwords(u256_t res, const uint_fast32_t x[8])
     }
 }
 
-// res[7]res[6]...res[0] -- from more to less bytes.
+// res[7]res[6]...res[0] -- from more to less significant bytes.
 void split_u256_to_dwords(uint_fast32_t res[8], const u256_t x)
 {
     for (unsigned int i = 0; i < 4; ++i)

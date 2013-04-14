@@ -12,8 +12,13 @@ TESTS_SRC = \
 	tests/substitution_test.c \
 	tests/hash_test.c
 
-TESTS_OBJ = $(SRC:.c=.o)
-TESTS_HEADERS = $(SRC:.c=.h)
+TESTS_OBJ = $(TESTS_SRC:.c=.o)
+TESTS_HEADERS = $(TESTS_SRC:.c=.h)
+TEST_DATA = \
+	tests/hashtest1.data \
+	tests/hashtest1.hash \
+	tests/hashtest2.data \
+	tests/hashtest2.hash
 
 EXEC_FILES = $(TESTS_SRC:.c=)
 
@@ -23,22 +28,27 @@ RELEASE_CFLAGS = -O2
 DEFINE = 
 
 #CFLAGS = --std=c99 -pedantic $(WARNINGS) $(DEBUG_CFLAGS) $(DEFINE)
+#STRIP = /bin/true
+
 CFLAGS = --std=c99 -pedantic $(WARNINGS) $(RELEASE_CFLAGS) $(DEFINE)
+STRIP = strip
+
+LDFLAGS =
 #LDFLAGS = -lgmp
 
 default: $(EXEC_FILES)
 
 tests/ioutils_test: $(OBJ) tests/ioutils_test.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
-	strip $@
+	$(STRIP) $@
 
 tests/substitution_test: $(OBJ) tests/substitution_test.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
-	strip $@
+	$(STRIP) $@
 
 tests/hash_test: $(OBJ) tests/hash_test.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
-	strip $@
+	$(STRIP) $@
 
 ifneq (clean, $(MAKECMDGOALS))
 ifneq (clang_analyze_clean, $(MAKECMDGOALS))
@@ -54,3 +64,9 @@ clean:
 
 clang_analyze_clean:
 	rm -f *.h.gch *.plist
+
+hashtest: tests/hash_test $(TEST_DATA)
+	./tests/hash_test tests/hashtest1.data
+	cat tests/hashtest1.hash
+	./tests/hash_test tests/hashtest2.data
+	cat tests/hashtest2.hash

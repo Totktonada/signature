@@ -19,7 +19,7 @@ void init_hasher(hasher_state * hs);
  * indexes of variable message. Unused bytes must be zero.
  * message_length in bytes. */
 void make_hasher_step(hasher_state * hs, const u256_t message,
-    int message_length);
+    unsigned int message_length);
 
 /* Resulting hash placed in hs->hash. */
 void get_hash(hasher_state * hs);

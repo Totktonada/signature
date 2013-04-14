@@ -208,6 +208,14 @@ static inline void read_qword_only(reader_state * rs, uint_fast64_t * res)
         (((uint_fast64_t) get_next_byte(rs)) << 56u);
 }
 
+static inline long get_readed_bytes(const reader_state * rs,
+    off_t map_off, off_t off)
+{
+    return (map_off == 0)
+        ? (rs->off - off)
+        : (rs->map_off - map_off) + (rs->off - off);
+}
+
 /* Can produce error, but can be involved after possible erroneous
  * operations (for example iterative) without rs->err checks.
  * Also, can be involved after end-of-file situation without
@@ -232,7 +240,7 @@ int read_qword(reader_state * rs, uint_fast64_t * res)
             " Maybe end-of-file situation check was forgotten?";
     }
 
-    return rs->err ? 0 : (rs->map_off - map_off) + (rs->off - off);
+    return rs->err ? 0 : get_readed_bytes(rs, map_off, off);
 }
 
 /* Similar to read_qword, but reads u256_t value.
@@ -256,5 +264,5 @@ int read_u256(reader_state * rs, u256_t res)
             " Maybe end-of-file situation check was forgotten?";
     }
 
-    return rs->err ? 0 : (rs->map_off - map_off) + (rs->off - off);
+    return rs->err ? 0 : get_readed_bytes(rs, map_off, off);
 }
