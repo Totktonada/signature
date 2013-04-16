@@ -28,6 +28,14 @@ static inline void concat_u256_from_qwords(u256_t res, uint_fast64_t x3,
     res[3] = x3;
 }
 
+static inline void u256_set(u256_t res, const u256_t x)
+{
+    res[0] = x[0];
+    res[1] = x[1];
+    res[2] = x[2];
+    res[3] = x[3];
+}
+
 static inline void xor_u256(u256_t res, const u256_t x, const u256_t y)
 {
     res[0] = x[0] ^ y[0];
@@ -61,6 +69,19 @@ static inline void u256_add(u256_t res, const u256_t a, const u256_t b)
     res[1] = a[1] + b[1] + (res[0] < a[0]);
     res[2] = a[2] + b[2] + (res[1] < a[1]);
     res[3] = a[3] + b[3] + (res[2] < a[2]);
+}
+
+#include <gmp.h>
+
+static inline void mpz_set_u256(mpz_t res, const u256_t x)
+{
+    mpz_set_ui(res, x[3] & 0xFFFFFFFFFFFFFFFFu);
+    mpz_mul_2exp(res, res, 64);
+    mpz_add_ui(res, res, x[2] & 0xFFFFFFFFFFFFFFFFu);
+    mpz_mul_2exp(res, res, 64);
+    mpz_add_ui(res, res, x[1] & 0xFFFFFFFFFFFFFFFFu);
+    mpz_mul_2exp(res, res, 64);
+    mpz_add_ui(res, res, x[0] & 0xFFFFFFFFFFFFFFFFu);
 }
 
 #endif // U256_H_SENTRY

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include "ioutils.h"
+#include "hash.h"
 
 #define MAP_SIZE_IN_PAGES 128
 
@@ -232,14 +233,6 @@ int read_qword(reader_state * rs, uint_fast64_t * res)
 
     read_qword_only(rs, res);
 
-    if (!rs->err && rs->off == off && rs->map_off == map_off)
-    {
-        rs->err = true;
-        rs->err_msg =
-            "Can not read next value."
-            " Maybe end-of-file situation check was forgotten?";
-    }
-
     return rs->err ? 0 : get_readed_bytes(rs, map_off, off);
 }
 
@@ -256,13 +249,59 @@ int read_u256(reader_state * rs, u256_t res)
     read_qword_only(rs, res + 2);
     read_qword_only(rs, res + 3);
 
-    if (!rs->err && rs->off == off && rs->map_off == map_off)
+    return rs->err ? 0 : get_readed_bytes(rs, map_off, off);
+}
+
+/* Print errors to stderr if occured.
+ * Returns true if error occured and false in normally case. */
+bool get_file_hash(u256_t hash, const char * filepath)
+{
+    reader_state rs;
+    u256_t message;
+
+    if (open_reader(&rs, filepath))
     {
-        rs->err = true;
-        rs->err_msg =
-            "Can not read next value."
-            " Maybe end-of-file situation check was forgotten?";
+        print_error(stderr, rs.err_msg);
+        return rs.err;
     }
 
-    return rs->err ? 0 : get_readed_bytes(rs, map_off, off);
+    hasher_state hs;
+    init_hasher(&hs);
+
+    do
+    {
+        int cnt = read_u256(&rs, message);
+
+        if (cnt < 1)
+        {
+            if (!rs.err && rs.eof)
+            {
+                break;
+            }
+
+            // Ignore possible close errors.
+            close_reader(&rs);
+
+            print_error(stderr, rs.err_msg);
+            return rs.err;
+        }
+
+        make_hasher_step(&hs, message, cnt);
+    }
+    while (!rs.eof);
+
+    // As defined in GOST R 34.11-94.
+    if (rs.filesize == 0)
+    {
+        make_hasher_step(&hs, message, 0u);
+    }
+
+    if (close_reader(&rs))
+    {
+        print_error(stderr, rs.err_msg);
+        return rs.err;
+    }
+
+    get_hash(hash, &hs);
+    return rs.err;
 }

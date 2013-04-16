@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "ioutils_test.h"
+#include "test_utils.h"
 #include "../ioutils.h"
 
 void help(FILE * stream, const char * prog_name)
@@ -9,27 +10,10 @@ void help(FILE * stream, const char * prog_name)
     fprintf(stream, "Usage: %s file.\n", prog_name);
 }
 
-void wrong_args(const char * prog_name)
-{
-    fprintf(stderr, "Bad arguments.\n");
-    help(stdout, prog_name);
-    exit(EXIT_FAILURE);
-}
-
-void print_error(FILE * stream, const char * msg)
-{
-    if (msg != NULL)
-    {
-        fprintf(stream, "%s\n", msg);
-    }
-}
-
 int main(int argc, char ** argv)
 {
-    if (argc != 2)
-    {
-        wrong_args(argv[0]);
-    }
+    check_help_arg(argc, argv);
+    check_args_count(argc, argv, 2);
 
     reader_state rs;
     uint_fast64_t qword;
@@ -44,7 +28,7 @@ int main(int argc, char ** argv)
     {
         if (read_qword(&rs, &qword) < 1)
         {
-            if (rs.eof)
+            if (!rs.err && rs.eof)
             {
                 break;
             }

@@ -21,7 +21,7 @@ void init_hasher(hasher_state * hs);
 void make_hasher_step(hasher_state * hs, const u256_t message,
     unsigned int message_length);
 
-/* Resulting hash placed in hs->hash. */
-void get_hash(hasher_state * hs);
+/* Resulting hash placed in hash and hs->hash. */
+void get_hash(u256_t hash, hasher_state * hs);
 
 #endif // HASH_H_SENTRY

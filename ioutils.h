@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "u256.h"
 
 typedef struct reader_state
@@ -53,5 +54,17 @@ static inline void printf_u256(const u256_t x)
         (unsigned long long int) x[1],
         (unsigned long long int) x[0]);
 }
+
+static inline void print_error(FILE * stream, const char * msg)
+{
+    if (msg != NULL)
+    {
+        fprintf(stream, "%s\n", msg);
+    }
+}
+
+/* Print errors to stderr if occured.
+ * Returns true if error occured and false in normally case. */
+bool get_file_hash(u256_t hash, const char * filepath);
 
 #endif // IOUTILS_H_SENTRY

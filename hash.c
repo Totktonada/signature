@@ -154,9 +154,10 @@ void make_hasher_step(hasher_state * hs, const u256_t message,
     hash_step(hs->hash, message, hs->hash);
 }
 
-/* Resulting hash placed in hs->hash. */
-void get_hash(hasher_state * hs)
+/* Resulting hash placed in hash and hs->hash. */
+void get_hash(u256_t hash, hasher_state * hs)
 {
     hash_step(hs->hash, hs->length, hs->hash);
     hash_step(hs->hash, hs->sum, hs->hash);
+    u256_set(hash, hs->hash);
 }

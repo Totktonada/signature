@@ -3,17 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 #include "substitution_test.h"
+#include "test_utils.h"
 #include "../ioutils.h"
 #include "../u256.h"
 #include "../substitution.h"
-
-//     Defines
-// ===================================================================
-
-#define STR_EQUAL(str1, str2) (strcmp((str1), (str2)) == 0)
-
-//     Functions
-// ===================================================================
 
 void help(FILE * stream, const char * prog_name)
 {
@@ -22,42 +15,11 @@ void help(FILE * stream, const char * prog_name)
         "Actions: \"enc\" or \"dec\".\n", prog_name);
 }
 
-void wrong_args(const char * prog_name)
-{
-    fprintf(stderr, "Bad arguments.\n");
-    help(stdout, prog_name);
-    exit(EXIT_FAILURE);
-}
-
-void print_error(FILE * stream, const char * msg)
-{
-    if (msg != NULL)
-    {
-        fprintf(stream, "%s\n", msg);
-    }
-}
-
 int main(int argc, char ** argv)
 {
-    if (argc != 3)
-    {
-        wrong_args(argv[0]);
-    }
-
-    bool mode_enc;
-
-    if (STR_EQUAL(argv[1], "enc"))
-    {
-        mode_enc = true;
-    }
-    else if (STR_EQUAL(argv[1], "dec"))
-    {
-        mode_enc = false;
-    }
-    else
-    {
-        wrong_args(argv[0]);
-    }
+    check_help_arg(argc, argv);
+    check_args_count(argc, argv, 3);
+    bool mode_enc = get_mode(argv, "enc", "dec");
 
     u256_t key;
 
@@ -81,7 +43,7 @@ int main(int argc, char ** argv)
     {
         if (read_qword(&rs, &qword) < 1)
         {
-            if (rs.eof)
+            if (!rs.err && rs.eof)
             {
                 break;
             }
