@@ -1,11 +1,118 @@
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/mman.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include "ioutils.h"
 #include "hash.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#include <errno.h>
+
+#define _SC_PAGESIZE 1
+
+static long sysconf(int name)
+{
+    if (name == _SC_PAGESIZE)
+    {
+        SYSTEM_INFO si;
+        GetSystemInfo(&si);
+        return si.dwPageSize;
+    }
+    else
+    {
+        errno = EINVAL;
+        return -1;
+    }
+}
+#else
+
+#include <unistd.h>
+
+#endif
+
+// Without mmap
+// ============
+#ifdef NO_MMAP
+#include <stdlib.h>
+#include <string.h>
+
+#define MAP_SIZE_IN_PAGES 1
+
+// Can not produce error, but use it as well munmap-used version.
+static bool munmap_wrapper(reader_state * rs)
+{
+    if (rs->map != NULL && rs->on_last_map)
+    {
+        free(rs->map);
+        rs->map = NULL;
+    }
+
+    return rs->err;
+}
+
+/* Can produce error, rs->err shall be checked.
+ * Returns resulting rs->err (false in normally case).
+ * Normally fill area by next available bytes (that compatibly
+ * with mmap-used version). */
+static bool mmap_wrapper(reader_state * rs)
+{
+    off_t offset = 0;
+
+    if (rs->map == NULL)
+    {
+        rs->map = malloc(rs->mapsize);
+    }
+
+    do
+    {
+        bool last_map = rs->filesize - (rs->map_off + rs->mapsize) < 1;
+
+        size_t to_read = last_map
+            ? (rs->filesize % rs->mapsize) - offset
+            : rs->mapsize - offset;
+
+        if (to_read < 1)
+        {
+            break;
+        }
+
+        int cnt = read(rs->fd, rs->map + offset, to_read);
+
+        if (cnt < 0)
+        {
+            rs->err = true;
+            rs->err_msg = NULL;
+            perror("read");
+            return rs->err;
+        }
+
+        if (cnt == 0)
+        {
+            rs->err = true;
+            rs->err_msg =
+                "Unexpected EOF. The stat() information used"
+                " is out of sync with the actual file data.";
+            return rs->err;
+        }
+
+        offset += cnt;
+    }
+    while(1);
+
+    if (offset < rs->mapsize)
+    {
+        memset(rs->map + offset, 0, rs->mapsize - offset);
+    }
+
+    return rs->err;
+}
+#endif
+
+// With mmap
+// =========
+#ifndef NO_MMAP
+#include <sys/mman.h>
 
 #define MAP_SIZE_IN_PAGES 128
 
@@ -44,6 +151,7 @@ static bool mmap_wrapper(reader_state * rs)
 
     return rs->err;
 }
+#endif
 
 /* Can produce error, rs->err shall be checked.
  * Returns resulting rs->err (false in normally case). */
@@ -149,7 +257,11 @@ bool open_reader(reader_state * rs, const char * filepath)
 
     if (rs->filesize > 0)
     {
+#ifdef _WIN32
+        rs->fd = open(filepath, O_RDONLY | O_BINARY);
+#else
         rs->fd = open(filepath, O_RDONLY);
+#endif
 
         if (rs->fd == -1)
         {

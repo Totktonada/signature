@@ -1,11 +1,15 @@
 .*.sw[a-z]
 .vim
+deps.mk
 *.o
 tests/ioutils_test
 tests/substitution_test
 tests/hash_test
 tests/signature_test
-deps.mk
+tests/ioutils_test.exe
+tests/substitution_test.exe
+tests/hash_test.exe
+tests/signature_test.exe
 valgrind.log
 *.h.gch
 *.plist

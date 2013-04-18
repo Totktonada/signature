@@ -87,7 +87,7 @@ void make_signature(signature * sign, const signature_attr * attr,
     mpz_init(k);
     gmp_randinit_mt(rs);
     // TODO: use /dev/random or CryptGetRandom().
-    gmp_randseed_ui(rs, 0xF4A83EB93CD13B26u);
+    gmp_randseed_ui(rs, 0x3CD13B26u);
 
     do
     {

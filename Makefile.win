@@ -1,3 +1,7 @@
+CC = i686-mingw32-gcc
+LD = i686-mingw32-ld
+AR = i686-mingw32-ar
+
 SRC = \
 	u256.c \
 	substitution.c \
@@ -23,37 +27,37 @@ TEST_FILES = \
 	tests/hashtest2.data \
 	tests/hashtest2.hash
 
-EXEC_FILES = $(TESTS_SRC:.c=)
+EXEC_FILES = $(TESTS_SRC:.c=.exe)
 
 WARNINGS = -Wall -Wextra
 DEBUG_CFLAGS = -g -DDEBUG=
 RELEASE_CFLAGS = -O2
-#DEFINE = -DNO_MMAP
-DEFINE =
+DEFINE = -DNO_MMAP
+#DEFINE =
 
 #CFLAGS = --std=c99 -pedantic $(WARNINGS) $(DEBUG_CFLAGS) $(DEFINE)
 #STRIP = /bin/true
 
 CFLAGS = --std=c99 -pedantic $(WARNINGS) $(RELEASE_CFLAGS) $(DEFINE)
-STRIP = strip
+STRIP = i686-mingw32-strip
 
-LDFLAGS = -lgmp
+LDFLAGS = -static -lgmp
 
 default: $(EXEC_FILES)
 
-tests/ioutils_test: $(OBJ) tests/ioutils_test.o
+tests/ioutils_test.exe: $(OBJ) tests/ioutils_test.o
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
 	$(STRIP) $@
 
-tests/substitution_test: $(OBJ) tests/substitution_test.o
+tests/substitution_test.exe: $(OBJ) tests/substitution_test.o
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
 	$(STRIP) $@
 
-tests/hash_test: $(OBJ) tests/hash_test.o
+tests/hash_test.exe: $(OBJ) tests/hash_test.o
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
 	$(STRIP) $@
 
-tests/signature_test: $(OBJ) tests/signature_test.o
+tests/signature_test.exe: $(OBJ) tests/signature_test.o
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
 	$(STRIP) $@
 

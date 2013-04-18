@@ -102,7 +102,7 @@ void test_signature_file(const char * read_filepath, mpz_t hash)
     mpz_init(sign.r);
     mpz_init(sign.s);
 
-    FILE * stream = open_wrapper(read_filepath, "r");
+    FILE * stream = open_wrapper(read_filepath, "rb");
     mpz_inp_wrapper(sign.r, stream);
     mpz_inp_wrapper(sign.s, stream);
     close_wrapper(stream);

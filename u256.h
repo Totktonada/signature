@@ -75,13 +75,27 @@ static inline void u256_add(u256_t res, const u256_t a, const u256_t b)
 
 static inline void mpz_set_u256(mpz_t res, const u256_t x)
 {
-    mpz_set_ui(res, x[3] & 0xFFFFFFFFFFFFFFFFu);
-    mpz_mul_2exp(res, res, 64);
-    mpz_add_ui(res, res, x[2] & 0xFFFFFFFFFFFFFFFFu);
-    mpz_mul_2exp(res, res, 64);
-    mpz_add_ui(res, res, x[1] & 0xFFFFFFFFFFFFFFFFu);
-    mpz_mul_2exp(res, res, 64);
-    mpz_add_ui(res, res, x[0] & 0xFFFFFFFFFFFFFFFFu);
+    // Integer type "unsigned long" (last arg of mpz_..._ui
+    // functions) can be 32-bits.
+
+    mpz_set_ui(res, (x[3] >> 32) & 0xFFFFFFFF);
+    mpz_mul_2exp(res, res, 32);
+    mpz_add_ui(res, res, x[3] & 0xFFFFFFFF);
+
+    mpz_mul_2exp(res, res, 32);
+    mpz_add_ui(res, res, (x[2] >> 32) & 0xFFFFFFFF);
+    mpz_mul_2exp(res, res, 32);
+    mpz_add_ui(res, res, x[2] & 0xFFFFFFFF);
+
+    mpz_mul_2exp(res, res, 32);
+    mpz_add_ui(res, res, (x[1] >> 32) & 0xFFFFFFFF);
+    mpz_mul_2exp(res, res, 32);
+    mpz_add_ui(res, res, x[1] & 0xFFFFFFFF);
+
+    mpz_mul_2exp(res, res, 32);
+    mpz_add_ui(res, res, (x[0] >> 32) & 0xFFFFFFFF);
+    mpz_mul_2exp(res, res, 32);
+    mpz_add_ui(res, res, x[0] & 0xFFFFFFFF);
 }
 
 #endif // U256_H_SENTRY
